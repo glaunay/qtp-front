@@ -1,0 +1,73 @@
+/*
+ See tricks : https://learnvue.co/2020/01/how-to-add-drag-and-drop-to-your-vuejs-project/
+*/
+<template>
+    <div class="w-full rounded border-dashed bg-gray-300 h-6"
+    @drop="handleDrop"
+    @click="coucou"
+    @dragover.prevent
+    @dragenter.prevent
+    >
+        <h1>
+            Drop Me
+        </h1>
+    </div>
+</template>
+
+<script lang="ts">
+import { defineComponent } from 'vue';
+import XLSX  from 'xlsx';
+export default defineComponent({
+    name: 'DragAndDrop',
+    data(){
+       return {
+           file:File,
+           //workbook:null as null|any
+       };
+    },
+    methods: {
+        processData(d: DragEvent["dataTransfer"]) {
+            if(!d) {
+                console.warn("Empty file object");
+                return;
+            }           
+            const file = d.files[0] as File;
+            const onLoad = (e: ProgressEvent<FileReader>) => {
+                const results = e?.target?.result as ArrayBuffer;
+                if(results) {
+                    const data = new Uint8Array(results);                  
+                    const workbook = XLSX.read(data, {type: 'array'});                    
+                    /* DO SOMETHING WITH workbook HERE */
+                    console.log("WBOOK");
+                    console.log(workbook);
+                }
+            };   
+            const reader = new FileReader();
+            reader.onload = onLoad;
+          
+            reader.readAsArrayBuffer(file);
+            //this.file = , f = files[0];
+            /*reaader = new FileReader();
+  reader.onload = function(e) {
+    var data = new Uint8Array(e.target.result);
+    var workbook = XLSX.read(data, {type: 'array'});
+        }
+        */
+        },
+        handleDrop(e: DragEvent) {
+            console.log("DROP!!");
+            e.stopPropagation(); e.preventDefault();
+            if(e.dataTransfer) 
+                this.processData(e.dataTransfer)
+        },
+        coucou(){
+            console.log("Coucou");
+        }
+    }
+    /*
+    mounted() {
+    },
+    unmounted(){       
+    }*/
+});
+</script>
