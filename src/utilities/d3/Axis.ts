@@ -3,18 +3,30 @@ import * as d3 from "d3";
 import { Points } from '../../utilities/models/volcano';
 import { NumberValue } from 'd3';
 
+/* To configure absciss positioning */
+interface AxisSpec {
+    range: [number,number];
+    absolutePosition: number;
+}
+
+interface AxisSpecs {
+    xAxis: AxisSpec;
+    yAxis: AxisSpec;
+}
 
 // root is actually a Dereferenced Ref<SVGSVGElement>, let's see....
 export default class Axis {
     svg:    SVGSVGElement;
     height: number;
     width:  number;
+    frame: d3.Selection<SVGGElement, unknown, null, undefined>;
     public xScale: d3.ScaleLinear<number, number> = d3.scaleLinear();
     public yScale: d3.ScaleLinear<number, number> = d3.scaleLinear();
     gX?:    d3.Selection<SVGGElement, unknown, null, undefined>;
     gY?:    d3.Selection<SVGGElement, unknown, null, undefined>;
     
-    private _marginLeft=15;
+    // Setters may have to reflect also to renderer ?
+    private _marginLeft=25;
     get marginLeft(): number {
         return this._marginLeft;
     }
@@ -54,6 +66,10 @@ export default class Axis {
         this.width  = width;
 
         this.computeMargins();
+        this.frame = d3.select(this.svg)
+            .append('g');
+        this.frame .attr('class', 'symbol-container');
+            //.attr('transform', `translate(${this.marginLeft}, ${this.height -  this.marginBot })`);// ${this.marginBot})`);
     }
     private computeMargins(){
         this.innerWidth  = this.width - this._marginRight - this._marginLeft;
@@ -69,7 +85,8 @@ export default class Axis {
         const xAxis = d3.axisBottom(this.xScale);
         this.gX = d3.select(this.svg).append('g')
                 .attr('class', 'x axis')
-                .attr('transform', `translate(${this.marginLeft}, ${this.height -  this.marginBot })`)
+                //.attr('transform', `translate(${this.marginLeft}, ${this.height -  this.marginBot })`)
+                .attr('transform', `translate(0, ${this.innerHeight})`)
                 .call(xAxis);
         this.gX.append('text')
                 .attr('class', 'label')
@@ -83,6 +100,7 @@ export default class Axis {
         
         this.gY = d3.select(this.svg).append('g')
                 .attr('class', 'y axis')
+                .attr('transform', `translate(${this.marginLeft}, 0)`)                
                 .call(yAxis);
 
         this.gY.append('text')
@@ -98,7 +116,7 @@ export default class Axis {
         
         const [min, max] = d3.extent(data, (d)=>d.x);
         if(min != undefined && max != undefined)
-            this.xScale.range([0, this.innerWidth])
+            this.xScale.range([this.marginLeft, this.innerWidth])
                 .domain([min, max])
                 .nice();
         else 
@@ -106,9 +124,9 @@ export default class Axis {
 
         const [_min, _max] = d3.extent(data, (d) =>  d.y);
         if ( _min != undefined && _max != undefined)
-            this.yScale.range(flip ? 
-                                    [this.innerHeight, 0] :
-                                    [0, this.innerHeight])
+            this.yScale.range(flip 
+                                ? [this.marginTop, this.innerHeight]
+                                : [this.innerHeight, this.marginTop] )
                 .domain([_min, _max])
                 .nice();
         else

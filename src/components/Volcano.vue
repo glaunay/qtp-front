@@ -26,6 +26,7 @@ import * as d3 from "d3";
 
 import Axis from '../utilities/d3/Axis';
 import VolcanoPlot from '../utilities/d3/VolcanoPlot';
+import Sliders from '../utilities/d3/Sliders';
 import * as t from '../utilities/models/volcano';
 /*
 This will have to be made reactive in parent .vue
@@ -71,9 +72,13 @@ export default defineComponent({
             const ploter = new VolcanoPlot(svgRoot.value as SVGSVGElement,
                                   axis.xScale,
                                   axis.yScale,
+                                  axis.frame,
                                   axis.gX,
                                   axis.gY);
             ploter.draw(p);
+
+            const sliderUI = new Sliders(svgRoot.value as SVGSVGElement);
+            sliderUI.draw();
         };
         watch( (props.data), (newData, oldData) =>{
             console.log("Data changed from");

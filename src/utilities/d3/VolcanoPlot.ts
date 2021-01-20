@@ -9,26 +9,37 @@ type d3IntScale = d3.ScaleLinear<number, number>;
 
 export default class VolcanoPlot {
     svg:    SVGSVGElement;
+    container?: SVGG;
     public xScale: d3.ScaleLinear<number, number>;
     public yScale: d3.ScaleLinear<number, number>;
 
     gX?:    SVGG;
     gY?:    SVGG;
     
-    constructor(root: SVGSVGElement, xScale: d3IntScale, yScale: d3IntScale, gX?: SVGG, gY?: SVGG) {
+    constructor(root: SVGSVGElement, xScale: d3IntScale, yScale: d3IntScale, container?: SVGG, gX?: SVGG, gY?: SVGG) {
         this.svg = root;
         this.xScale = xScale;
         this.yScale = yScale;
+        this.container = container
         this.gX = gX;
         this.gY = gY;
     }
     draw(data: Points[]) {
-        const circles = d3.select(this.svg)
+        if(this.container) {
+            console.log("OTHOT");
+            console.dir(this.container);
+        }   
+        const container = this.container 
+                        ? this.container
+                        : d3.select(this.svg).append('g').attr('class', 'plot-container');
+
+        /*const circles = d3.select(this.svg)
             .append('g')
             .attr('class', 'circlesContainer');
-
+        */
+        //container.attr('class', 'circlesContainer');
     // Create circle foreach line in tsv
-            circles.selectAll(".dot")
+        container.selectAll(".dot")
                 .data(data)
                 .enter().append('circle')
                 .attr('r', 3)
