@@ -27,9 +27,10 @@
     <Sliders/>
    <!--  <Volcano :x="[5,3]" :y="[9,1]"/> -->
     <!-- <button @click="test()" class="p-1 border rounded shadow w-15 h-10">TEST</button>-->
+    <div class="p-2">
      <Volcano :data="plotData"/>
     <!-- <Volcano height=500 width=500/> -->
-  
+    </div>
 </template>
 
 <script lang="ts">

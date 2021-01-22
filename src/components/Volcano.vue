@@ -53,6 +53,10 @@ export default defineComponent({
             default:500
         },
     },
+    /**
+     * PAn & Zoom + axis rescale
+     * http://bl.ocks.org/stepheneb/1182434
+     */
     setup(props){
         const svgRoot: Ref<SVGSVGElement|null> = ref(null);
 
