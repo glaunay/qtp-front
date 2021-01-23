@@ -4,12 +4,13 @@ import { Points } from '../../utilities/models/volcano';
 
 type SVGG = d3.Selection<SVGGElement, unknown, null, undefined>;
 type d3IntScale = d3.ScaleLinear<number, number>;
+type PlotDotSel = d3.Selection<SVGCircleElement, Points, SVGGElement, unknown>;
 
-
-
+//export type PlotDotSel = () => void;
 export default class VolcanoPlot {
     svg:    SVGSVGElement;
     container?: SVGG;
+    points?: PlotDotSel;
     public xScale: d3.ScaleLinear<number, number>;
     public yScale: d3.ScaleLinear<number, number>;
 
@@ -39,19 +40,14 @@ export default class VolcanoPlot {
         */
         //container.attr('class', 'circlesContainer');
     // Create circle foreach line in tsv
-        container.selectAll(".dot")
+        this.points = container.selectAll(".dot")
                 .data(data)
                 .enter().append('circle')
                 .attr('r', 3)
                 .attr('cx', (d) => this.xScale(d.x))
                 .attr('cy', (d) => this.yScale(d.y))
                 /*.attr('class', circleClass)*/
-                .on('mouseenter', (d) => console.log(d));
-                /*
-                .on("mousemove", tipMove)
-                .on('mouseleave', function(d) {
-                    return tooltip.style('visibility', 'hidden');
-                });*/
-
+                .on('mouseenter', (e,d) => console.log(d))
+                .on('click', (e, d) => { e.stopPropagation(); });
     }
 }

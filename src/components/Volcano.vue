@@ -26,7 +26,8 @@ import * as d3 from "d3";
 
 import Axis from '../utilities/d3/Axis';
 import VolcanoPlot from '../utilities/d3/VolcanoPlot';
-import Sliders from '../utilities/d3/Sliders';
+import { Sliders } from '../utilities/d3/Sliders';
+import ActiveLayers from '../utilities/d3/ActiveLayers';
 import * as t from '../utilities/models/volcano';
 /*
 This will have to be made reactive in parent .vue
@@ -65,6 +66,8 @@ export default defineComponent({
             console.log(data);
             const pointList: t.Points[] = data.x.map((e, i) => ({x:e, y:data.y[i]}) );
 
+            const layerUI = new ActiveLayers(svgRoot.value as SVGSVGElement);
+
             const axis = new Axis(svgRoot.value as SVGSVGElement,
                                   props.height, props.height);
             const p: t.Points[] = axis.draw(pointList, props.data.xLabel, props.data.yLabel);
@@ -73,6 +76,8 @@ export default defineComponent({
             margin and pass it to the ploter
             */
             
+            
+
             const ploter = new VolcanoPlot(svgRoot.value as SVGSVGElement,
                                   axis.xScale,
                                   axis.yScale,
@@ -80,9 +85,19 @@ export default defineComponent({
                                   axis.gX,
                                   axis.gY);
             ploter.draw(p);
-
+            
+            // fire resize event for activlayer to resize
             const sliderUI = new Sliders(svgRoot.value as SVGSVGElement);
             sliderUI.draw();
+            d3.select(svgRoot.value).on("click",
+            (e)=>{
+                console.log("Background click");
+                console.dir(e);
+                layerUI.update(sliderUI, e.layerX, e.layerY)
+            });
+            
+            
+            
         };
         watch( (props.data), (newData, oldData) =>{
             console.log("Data changed from");
