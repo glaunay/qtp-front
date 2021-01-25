@@ -1,8 +1,9 @@
 import * as d3 from "d3";
-import Axis from "./Axis";
+import { PlotFrame } from "./Axis";
+import { trCoordinates } from './utils';
 
-type axType = 'bottom'| 'right';
-type axNum  = 1 | 2;
+export type axType = 'bottom'| 'right';
+export type axNum  = 1 | 2;
 type GSel =  d3.Selection<SVGGElement, unknown, null, undefined>;
 
 export interface SlidersI {
@@ -14,32 +15,30 @@ export class Sliders {
     svg: SVGSVGElement;
     specsBot: SlidersI = { handlers : [], ghosts : [] };
     specsRight: SlidersI = { handlers : [], ghosts : [] };
-    private re = /translate\([\s]*([\d]+),[\s]*([\d]+)\)/;
+    currentAxType?: axType;
+    currentAxNum?: axNum;
+    
     public get xLimits(): number[] {
         return this.specsBot.handlers.map((g)=>{
             const _ = g.attr('transform');
-            const h = this.re.exec(_);
-            if(h != undefined)
-                return Number.parseInt(h[1]);
-            else
-                throw("Cant parse slide xlimit");
+            //console.log(`xAxis G ${_}`);
+            const t = trCoordinates(g);
+            return t[0];
         });
     }
     public get yLimits(): number[] {
         return this.specsRight.handlers.map((g)=>{
             const _ = g.attr('transform');
-            const h = this.re.exec(_);
-            if(h != undefined)
-                return Number.parseInt(h[2]);
-            else
-                throw("Cant parse slide ylimit");
+            //console.log(`yAxis G ${_}`);            
+            const t = trCoordinates(g);
+            return t[1];
         });
     }
     constructor(svg: SVGSVGElement){
         this.svg = svg;
 
     }
-
+    private slideFn?: (arg0: Sliders, arg1?: axType, arg2?: axNum) => void;
     private drawHandler(axis: axType, count: axNum) {
         const size = 300;
        
@@ -77,12 +76,12 @@ export class Sliders {
             return g;
         }
 
-        for (let i = 0 ; i < count ; i++) {
-            const gSlider = generateHandlerG(size, i == 0 ? slCoor : slCoorLow as number);
+        for (let i: axNum = 1 ; i <= count ; i++) {
+            const gSlider = generateHandlerG(size, i == 1 ? slCoor : slCoorLow as number);
             gSlider.attr('class', 'handler')
                 .attr('fill', 'gray');
 
-            const gGhost = generateHandlerG(size, i == 0 ? slCoor : slCoorLow as number);
+            const gGhost = generateHandlerG(size, i == 1 ? slCoor : slCoorLow as number);
             gGhost.attr('class', 'handler-ghost')
                 .attr('fill', 'gray')
                 .attr('visibility', 'hidden');
@@ -92,16 +91,18 @@ export class Sliders {
                     gSlider.attr('stroke-width', 4).attr("stroke", "lime");
                     gGhost.attr('visibility', 'visible');
                     event.sourceEvent.stopPropagation();
+                    this.currentAxNum = i;
+                    this.currentAxType = axis;
                 })
                 .on("drag", (event, d: any) => {
                     let newCoor = 0;
-                    if (i==0) {                       
+                    if (i == 1) {                       
                         slCoor = axis == 'bottom' ? event.x : event.y;
                         if (count == 2)
                             slCoor = slCoor < (slCoorLow as number) 
                                             ? slCoorLow as number
                                             : slCoor;
-                        newCoor = slCoor                                               
+                        newCoor = slCoor    
                     } else {
                         slCoorLow = axis == 'bottom' ? event.x : event.y;
                         slCoorLow = slCoorLow as number < slCoor 
@@ -114,6 +115,8 @@ export class Sliders {
                                             ? `translate(${newCoor},${h})`
                                             : `rotate(270, ${w},${newCoor}) translate(${w},${newCoor})`
                                             );
+                    if(this.slideFn)
+                        this.slideFn(this, axis, i);
 
                 })  
                 .on("end", (event, d) => {
@@ -121,6 +124,8 @@ export class Sliders {
                     gGhost.attr('visibility', 'hidden');
                     gGhost.attr('transform', gSlider.attr('transform'));
                     event.sourceEvent.stopPropagation();
+                    this.currentAxNum = undefined;
+                    this.currentAxType = undefined;
                 });// Could not fathom the proper types; 
                 
             gSlider.call(D as any);
@@ -143,6 +148,9 @@ export class Sliders {
     draw(){
         this.specsBot   = this.drawHandler("bottom", 2);
         this.specsRight = this.drawHandler("right", 1);
+    }
+    public onSlide(callback: (arg0: Sliders, arg1?: axType, arg2?: axNum) => void){
+       this.slideFn = callback;
     }
         
 }

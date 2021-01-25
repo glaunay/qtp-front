@@ -2,28 +2,49 @@
 import * as d3 from "d3";
 import { Points } from '../../utilities/models/volcano';
 import { NumberValue } from 'd3';
+import { trCoordinates } from './utils';
+
+// classic is the y axis as left side of rectangle and x as it base
+// tTilted is the yaxis as the median of base, base being x axis
+// ie : y positions are always graphically "positive" while x can be "negative or positive"
+// cross is y and y axis mutual medians
+// ie : y and x can be graphicaly "negative or positive"
+
+type AxisOrientation = 'classic' | 'tTilted' | 'cross';   
+type GSel =  d3.Selection<SVGGElement, unknown, null, undefined>;
 
 /* To configure absciss positioning */
 interface AxisSpec {
     range: [number,number];
-    absolutePosition: number;
-}
+    absolutePosition: number; // Abs position in x-units for y axis
+}                             // Abs position in y-units for x axis
 
 interface AxisSpecs {
     xAxis: AxisSpec;
     yAxis: AxisSpec;
 }
 
+export interface PlotFrame {
+    svg:    SVGSVGElement;
+    height: number;
+    width:  number;
+    marginLeft: number;
+    marginTop: number;
+    marginRight: number;
+    marginBot: number;
+    axisSpecs: AxisSpecs;
+}
+
 // root is actually a Dereferenced Ref<SVGSVGElement>, let's see....
-export default class Axis {
+export class Axis implements PlotFrame{
     svg:    SVGSVGElement;
     height: number;
     width:  number;
     frame: d3.Selection<SVGGElement, unknown, null, undefined>;
     public xScale: d3.ScaleLinear<number, number> = d3.scaleLinear();
     public yScale: d3.ScaleLinear<number, number> = d3.scaleLinear();
-    gX?:    d3.Selection<SVGGElement, unknown, null, undefined>;
-    gY?:    d3.Selection<SVGGElement, unknown, null, undefined>;
+    gX?:    GSel;
+    gY?:    GSel;
     
     // Setters may have to reflect also to renderer ?
     private _marginLeft=25;
@@ -58,6 +79,20 @@ export default class Axis {
         this._marginBot = v;
         this.computeMargins();
     } 
+    get axisSpecs(): AxisSpecs{
+        const xTr = trCoordinates(this.gX as GSel);
+        const yTr = trCoordinates(this.gY as GSel)
+        return {
+            xAxis: { 
+                range: this.xScale.range() as [number, number],
+                absolutePosition: xTr[1]
+            },
+            yAxis: { 
+                range: this.yScale.range() as [number, number],
+                absolutePosition: xTr[0]
+            }
+        };
+    }
     innerWidth=0;
     innerHeight=0;
     constructor(root: SVGSVGElement, height: number, width: number) {
@@ -75,7 +110,8 @@ export default class Axis {
         this.innerWidth  = this.width - this._marginRight - this._marginLeft;
         this.innerHeight = this.height - this._marginTop - this._marginBot;
     }
-    draw(data: Array<Points>, xLabel: string, yLabel: string, flip=false) {
+    draw(data: Array<Points>, xLabel: string, yLabel: string, 
+         AxisOrientation='classic', flip=false) {
         
         const yTickFormat = (n: NumberValue) =>  d3.format(".2r")(n); //getBaseLog(10, n));
                 

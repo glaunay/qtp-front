@@ -17,7 +17,8 @@ export default class VolcanoPlot {
     gX?:    SVGG;
     gY?:    SVGG;
     
-    constructor(root: SVGSVGElement, xScale: d3IntScale, yScale: d3IntScale, container?: SVGG, gX?: SVGG, gY?: SVGG) {
+    constructor(root: SVGSVGElement, xScale: d3IntScale, yScale: d3IntScale, 
+                container?: SVGG, gX?: SVGG, gY?: SVGG) {
         this.svg = root;
         this.xScale = xScale;
         this.yScale = yScale;
@@ -32,7 +33,8 @@ export default class VolcanoPlot {
         }   
         const container = this.container 
                         ? this.container
-                        : d3.select(this.svg).append('g').attr('class', 'plot-container');
+                        : d3.select(this.svg).append('g')
+                            .attr('class', 'plot-container');
 
         /*const circles = d3.select(this.svg)
             .append('g')
@@ -48,6 +50,6 @@ export default class VolcanoPlot {
                 .attr('cy', (d) => this.yScale(d.y))
                 /*.attr('class', circleClass)*/
                 .on('mouseenter', (e,d) => console.log(d))
-                .on('click', (e, d) => { e.stopPropagation(); });
+                .on('click', (e, d) => { e.stopPropagation();  });
     }
 }

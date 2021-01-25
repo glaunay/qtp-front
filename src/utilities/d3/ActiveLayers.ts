@@ -1,11 +1,15 @@
 
 import * as d3 from "d3";
-import { Sliders } from './Sliders';
+import { Sliders, axType, axNum } from './Sliders';
 import VolcanoPlot from './VolcanoPlot';
+import { PlotFrame } from './Axis';
+import { axisRight } from "d3";
+import { defineAsyncComponent, registerRuntimeCompiler } from "vue";
 
 type RectSel = d3.Selection<SVGRectElement, number, SVGGElement, unknown>
 export default class ActiveLayers {
     svg: SVGSVGElement;
+    plotFrame?: PlotFrame;
     recPool: RectSel;
     constructor(svg: SVGSVGElement) {
         this.svg = svg;
@@ -21,7 +25,7 @@ export default class ActiveLayers {
         .attr('y', 50)
         .attr('width', 50)
         .attr('height', 50)
-        .attr('fill', 'teal')
+        .attr('fill', 'khaki')
         .attr('visibility', 'hidden')
         .on('click', function(e){
             d3.select(this).attr('visibility', 'hidden');
@@ -35,7 +39,7 @@ export default class ActiveLayers {
             if (found)
                 return false;
             if (d3.select(this).attr('visibility') == 'hidden') {
-                found =true;
+                found = true;
                 return true;
             }
             return false;
@@ -43,21 +47,68 @@ export default class ActiveLayers {
 
         return sel;
     }
-    update(sliderUI: Sliders, x: number, y: number) {
-        console.log("resizing layers");
-        console.log(x,y);
-        const newRect = this.getAvailableRec();
-        newRect.attr('width', 200).attr('visibility', 'visible');
-    
-       
+    resize(sliderUI: Sliders){
+        if(!this.plotFrame)
+            throw('Missing a plot frame to resize active layer');
+        const frame = {
+            x1 : this.plotFrame.marginLeft,
+            x2 : Number.parseInt( d3.select(this.svg).attr('width') ) - this.plotFrame.marginRight,
+            y1 : this.plotFrame.marginTop,
+            y2 : Number.parseInt( d3.select(this.svg).attr('height') ) - this.plotFrame.marginBot
+        };
+
+        console.log("RESIZING LOGIC");
         const xLimSl = sliderUI.xLimits;
         const yLimSl = sliderUI.yLimits;
-    
+        console.log(sliderUI.currentAxType, sliderUI.currentAxNum);
+        this.recPool.each(function(d) {            
+            if (d3.select(this).attr('visibility') == 'hidden')
+                return;
+            const x  = Number.parseInt( d3.select(this).attr('x') );
+            const y  = Number.parseInt( d3.select(this).attr('y') );
+            const x2 = Number.parseInt( d3.select(this).attr('x2') );
+            const y2 = Number.parseInt( d3.select(this).attr('y2') );
+            console.log(`Current layer ${x},${y}:${x2},${y2}`);      
+            console.log("---");
+            console.log(`xlimSl ${xLimSl}`);
+            console.dir(`ylimSl ${yLimSl}`);
+            
+            // Y slider changing everyone is affected
+            if(sliderUI.currentAxType == 'right') {
+                if(y == frame.y1) {
+                    console.log('top_Y is constant stretching bot ')
+                    d3.select(this).attr('y2', yLimSl[0])
+                                   .attr('height', yLimSl[0] - frame.y1);
+                }
+            }
 
-        let x1 = 0,
+            // Check which slider moved
+
+        });
+    }
+    toggle(sliderUI: Sliders, x: number, y: number) {
+        if(!this.plotFrame)
+            throw('Missing a plot frame to toggle active layer');
+        const axis = this.plotFrame;
+        console.log("adding layers");    
+        const xLimSl = sliderUI.xLimits;
+        const yLimSl = sliderUI.yLimits;
+
+        console.log("DRAWING LOGIC");
+        console.log(x,y);
+    
+        // Upper-left, bottom-right corners of data projection area
+        /*let x1 = 0,
             x2 = Number.parseInt( d3.select(this.svg).attr('width') ),
             y1 = 0,
             y2 = Number.parseInt( d3.select(this.svg).attr('height') );
+        */
+        let x1 = axis.marginLeft,
+            x2 = Number.parseInt( d3.select(this.svg).attr('width') ) - axis.marginRight,
+            y1 = axis.marginTop,
+            y2 = Number.parseInt( d3.select(this.svg).attr('height') ) - axis.marginBot;
+
+
         // browse xlim and find smaller than negative -> x0
         //                              positive ->
         
@@ -88,7 +139,22 @@ export default class ActiveLayers {
             x1 = xLeft;
             x2 = xRight;
         }
+        console.log(axis.axisSpecs);
 
         console.log(`Painting ${x1},${y1}:${x2},${y2}`);
-    }
+        const xRec = x1;
+        const yRec = y1;
+        const width = x2 - x1;
+        const height = y2 - y1;
+
+        const newRect = this.getAvailableRec();
+        newRect.attr('x', xRec)
+        .attr('y', yRec)
+        .attr('x2', x2)
+        .attr('y2', y2)
+        .attr('width', width)
+        .attr('height', height)
+        .attr('visibility', 'visible');
+       
+    } 
 }
