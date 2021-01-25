@@ -69,7 +69,7 @@ export default class ActiveLayers {
             const x2 = Number.parseInt( d3.select(this).attr('x2') );
             const y2 = Number.parseInt( d3.select(this).attr('y2') );
             console.log(`Current layer ${x},${y}:${x2},${y2}`);      
-            console.log("---");
+            console.log(`---${sliderUI.currentAxType}`);
             console.log(`xlimSl ${xLimSl}`);
             console.dir(`ylimSl ${yLimSl}`);
             
@@ -80,10 +80,36 @@ export default class ActiveLayers {
                     d3.select(this).attr('y2', yLimSl[0])
                                    .attr('height', yLimSl[0] - frame.y1);
                 }
+                else if(y2 == frame.y2) {
+                    console.log('bot_Y is constant stretching top ')
+                    d3.select(this).attr('y', yLimSl[0])
+                                   .attr('height', frame.y2 - yLimSl[0]);
+                }
             }
-
-            // Check which slider moved
-
+            else if(sliderUI.currentAxType == 'bottom') {
+                console.log(`current active count ${sliderUI.currentAxNum}`);
+                if(sliderUI.currentAxNum == 1 &&
+                    x2 == frame.x2) {
+                    console.log('Right Layer(s) to mod');
+                    console.log(xLimSl);
+                    d3.select(this).attr('x', xLimSl[0])
+                    .attr('width', frame.x2 - xLimSl[0]);                    
+                }
+                else if(sliderUI.currentAxNum == 2 &&
+                    x == frame.x1) {
+                    console.log('Left Layer(s) to mod');
+                    console.log(xLimSl);
+                    d3.select(this).attr('x2', xLimSl[1])
+                    .attr('width', xLimSl[1] - frame.x1);                    
+                }
+                else { 
+                    console.log('Middle Layer(s) to mod');
+                    console.log(xLimSl);
+                    d3.select(this).attr('x', xLimSl[1])
+                    .attr('x2', xLimSl[0])
+                    .attr('width', xLimSl[0] - xLimSl[1]);       
+                }
+            }
         });
     }
     toggle(sliderUI: Sliders, x: number, y: number) {

@@ -24,6 +24,13 @@ interface AxisSpecs {
     yAxis: AxisSpec;
 }
 
+interface ActiveCorners { // Top-left, Bottom-right point coordinates
+    x1: number;
+    y1: number;
+    x2: number;
+    y2: number;
+}
+
 export interface PlotFrame {
     svg:    SVGSVGElement;
     height: number;
@@ -33,6 +40,7 @@ export interface PlotFrame {
     marginRight: number;
     marginBot: number;
     axisSpecs: AxisSpecs;
+    getActiveCorners: () => ActiveCorners;
 }
 
 // root is actually a Dereferenced Ref<SVGSVGElement>, let's see....
@@ -46,6 +54,21 @@ export class Axis implements PlotFrame{
     gX?:    GSel;
     gY?:    GSel;
     
+
+    private activeBackGroundCallback?: (x: number, y: number) => void;
+    public onActiveBackgroundClick(fn: (x: number, y: number) => void) {
+        this.activeBackGroundCallback = fn;
+    }
+    
+    public getActiveCorners(): ActiveCorners {
+        return  {
+            x1 : this.marginLeft,
+            x2 : Number.parseInt( d3.select(this.svg).attr('width') ) - this.marginRight,
+            y1 : this.marginTop,
+            y2 : Number.parseInt( d3.select(this.svg).attr('height') ) - this.marginBot
+        } as ActiveCorners;
+    }
+
     // Setters may have to reflect also to renderer ?
     private _marginLeft=25;
     get marginLeft(): number {
@@ -144,6 +167,17 @@ export class Axis implements PlotFrame{
                 .attr('transform', 'translate(' + (0 - this.marginLeft / 1.25) + ',' + (this.height / 2) + ') rotate(-90)')
                 .style('text-anchor', 'middle')
                 .html(yLabel);
+        // Restricting bkg click to within margins area
+        d3.select(this.svg).on('click',
+            (e) => {
+                if( e.layerX > this.marginLeft && 
+                    e.layerX < (this.marginLeft + this.innerWidth) &&
+                    e.layerY > this.marginTop && 
+                    e.layerY < (this.marginTop + this.innerHeight)
+                    ) 
+                    if(this.activeBackGroundCallback)
+                        this.activeBackGroundCallback(e.layerX, e.layerY);       
+            });
         return data;
          
     }

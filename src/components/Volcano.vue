@@ -89,14 +89,16 @@ export default defineComponent({
           
             
             // fire resize event for activlayer to resize
-            const sliderUI = new Sliders(svgRoot.value as SVGSVGElement);
+            const sliderUI = new Sliders(axis);
             sliderUI.draw();
+            axis.onActiveBackgroundClick( (x, y)=> layerUI.toggle(sliderUI, x, y) );
+            /*
             d3.select(svgRoot.value).on("click",
             (e)=>{
                 console.log("Background click");
                 console.dir(e);
                 layerUI.toggle(sliderUI, e.layerX, e.layerY)
-            });
+            });*/
             sliderUI.onSlide(() => layerUI.resize(sliderUI) );
 
             

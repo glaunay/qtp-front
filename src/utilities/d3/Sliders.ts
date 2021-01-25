@@ -17,7 +17,7 @@ export class Sliders {
     specsRight: SlidersI = { handlers : [], ghosts : [] };
     currentAxType?: axType;
     currentAxNum?: axNum;
-    
+    plotFrame: PlotFrame;
     public get xLimits(): number[] {
         return this.specsBot.handlers.map((g)=>{
             const _ = g.attr('transform');
@@ -34,9 +34,9 @@ export class Sliders {
             return t[1];
         });
     }
-    constructor(svg: SVGSVGElement){
-        this.svg = svg;
-
+    constructor(plotFrame: PlotFrame){
+        this.svg = plotFrame.svg;
+        this.plotFrame = plotFrame;
     }
     private slideFn?: (arg0: Sliders, arg1?: axType, arg2?: axNum) => void;
     private drawHandler(axis: axType, count: axNum) {
@@ -52,7 +52,6 @@ export class Sliders {
         slCoorLow = count == 2 ? 1/4 * (axis == 'bottom' ? w : h) : undefined;        
 
    
-        
         //const sliders: SlidersI = { handlers : [], ghosts : [] };
         const sliders = axis == 'bottom' ? this.specsBot : this.specsRight;
         const generateHandlerG = (size: number, initCoor: number) => {
@@ -76,14 +75,17 @@ export class Sliders {
             return g;
         }
 
+        const frame = this.plotFrame.getActiveCorners();
+
         for (let i: axNum = 1 ; i <= count ; i++) {
             const gSlider = generateHandlerG(size, i == 1 ? slCoor : slCoorLow as number);
             gSlider.attr('class', 'handler')
-                .attr('fill', 'gray');
-
+                   .attr('fill', 'gray')
+                   .attr('stroke-width', 1).attr("stroke", "gray")
             const gGhost = generateHandlerG(size, i == 1 ? slCoor : slCoorLow as number);
             gGhost.attr('class', 'handler-ghost')
                 .attr('fill', 'gray')
+                .attr('opacity', 0.2)
                 .attr('visibility', 'hidden');
             const D = d3.drag()
                 .on("start", (event, d) => {
@@ -110,6 +112,19 @@ export class Sliders {
                                     : slCoor;
                         newCoor = slCoorLow as number;
                     }
+                    
+                    if(axis == 'bottom') {
+                        if(newCoor > frame.x2) 
+                            newCoor = frame.x2;
+                        else if(newCoor < frame.x1)
+                            newCoor = frame.x1;
+                    } else { 
+                        console.log(`Drag pourt ${newCoor} ${frame.y1} ${frame.y2}`);
+                        if(newCoor > frame.y2) 
+                            newCoor = frame.y2;
+                        else if(newCoor < frame.y1)
+                            newCoor = frame.y1;
+                    }
                     gSlider.attr('transform', 
                                             axis == 'bottom' 
                                             ? `translate(${newCoor},${h})`
@@ -120,7 +135,7 @@ export class Sliders {
 
                 })  
                 .on("end", (event, d) => {
-                    gSlider.attr('stroke-width', 1).attr("stroke", "black");
+                    gSlider.attr('stroke-width', 1).attr("stroke", "gray");
                     gGhost.attr('visibility', 'hidden');
                     gGhost.attr('transform', gSlider.attr('transform'));
                     event.sourceEvent.stopPropagation();

@@ -23,8 +23,9 @@
       </select> 
       </label>
     </div>
-    -->
     <Sliders/>
+    -->
+    
    <!--  <Volcano :x="[5,3]" :y="[9,1]"/> -->
     <!-- <button @click="test()" class="p-1 border rounded shadow w-15 h-10">TEST</button>-->
     <div class="p-2">
@@ -36,14 +37,14 @@
 <script lang="ts">
 import { defineComponent, computed, ref, Ref, reactive } from 'vue';
 import { useStore, mapGetters } from 'vuex'
-import Sliders from '@/components/Sliders.vue';
+//import Sliders from '@/components/Sliders.vue';
 import Volcano from '@/components/Volcano.vue';
 import { plotData  as plotDataType } from '../utilities/models/volcano';
 import { toggle } from '../utilities/Arrays';
 export default defineComponent({
 
 
-  components: { Sliders, Volcano },
+  components: { /*Sliders,*/ Volcano },
 
   setup() {
     const store = useStore();
