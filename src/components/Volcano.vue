@@ -70,15 +70,11 @@ export default defineComponent({
 
             const axis = new Axis(svgRoot.value as SVGSVGElement,
                                   props.height, props.height);
-            const p: t.Points[] = axis.draw(pointList, props.data.xLabel, props.data.yLabel);
+            const p: t.Points[] = axis.draw(pointList, 
+                                            props.data.xLabel, props.data.yLabel
+                                        );
             layerUI.plotFrame = axis;
-            /*
-            Simpler to set up a whole g "frame" to account for all 
-            margin and pass it to the ploter
-            */
-            
-            
-
+   
             const ploter = new VolcanoPlot(svgRoot.value as SVGSVGElement,
                                   axis.xScale,
                                   axis.yScale,
@@ -86,23 +82,13 @@ export default defineComponent({
                                   axis.gX,
                                   axis.gY);
             ploter.draw(p);
-          
-            
-            // fire resize event for activlayer to resize
             const sliderUI = new Sliders(axis);
             sliderUI.draw();
+            
+            // Adding/Resizing Layer Logic
             axis.onActiveBackgroundClick( (x, y)=> layerUI.toggle(sliderUI, x, y) );
-            /*
-            d3.select(svgRoot.value).on("click",
-            (e)=>{
-                console.log("Background click");
-                console.dir(e);
-                layerUI.toggle(sliderUI, e.layerX, e.layerY)
-            });*/
             sliderUI.onSlide(() => layerUI.resize(sliderUI) );
 
-            
-            
         };
         watch( (props.data), (newData, oldData) =>{
             console.log("Data changed from");
@@ -111,20 +97,9 @@ export default defineComponent({
             console.dir(newData);
             draw(newData);
         });
-
-       
-        /*const data = computed( () => props.x.map( (e, i) =>  ({ 'x' : e, 'y' : props.y[i]})) );
-
-        const test = () => {
-            console.log("Testing");
-            console.log(data);
-        };*/
-
         onMounted(() => {
         // the DOM element will be assigned to the ref after initial render
-        console.log(svgRoot.value) // <div>This is a root element</div>
-        /*console.log(d3);*/
-        console.log(props.height, props.width);
+        //console.log(svgRoot.value) // <div>This is a root element</div>
         d3.select(svgRoot.value)
         .attr("height", props.height)
         .attr("width", props.width)
@@ -134,14 +109,8 @@ export default defineComponent({
       return {
         svgRoot
       }
-    
-    
     }
-
-
-
 });
-
 </script>
 
 <style scoped>

@@ -1,7 +1,7 @@
 
 import * as d3 from "d3";
 import { Points } from '../../utilities/models/volcano';
-import { NumberValue } from 'd3';
+import { NumberValue, thresholdSturges } from 'd3';
 import { trCoordinates } from './utils';
 
 // classic is the y axis as left side of rectangle and x as it base
@@ -116,8 +116,9 @@ export class Axis implements PlotFrame{
             }
         };
     }
-    innerWidth=0;
-    innerHeight=0;
+    public innerWidth = 0;
+    public innerHeight = 0;
+
     constructor(root: SVGSVGElement, height: number, width: number) {
         this.svg    = root;
         this.height = height;
@@ -134,12 +135,10 @@ export class Axis implements PlotFrame{
         this.innerHeight = this.height - this._marginTop - this._marginBot;
     }
     draw(data: Array<Points>, xLabel: string, yLabel: string, 
-         AxisOrientation='classic', flip=false) {
+         axisOrientation: AxisOrientation='classic', flip=false) {
         
         const yTickFormat = (n: NumberValue) =>  d3.format(".2r")(n); //getBaseLog(10, n));
                 
-        console.log("Coucou");
-        console.log(this.marginLeft);
         this.setScale(data, flip);
         const xAxis = d3.axisBottom(this.xScale);
         this.gX = d3.select(this.svg).append('g')
@@ -154,14 +153,26 @@ export class Axis implements PlotFrame{
                 .text(xLabel);
 
         const  yAxis = d3.axisLeft(this.yScale)
-                .ticks(5)
-                .tickFormat(yTickFormat);
+                .ticks(10)
+                .tickFormat(yTickFormat)
+        if(axisOrientation == 'cross')
+            yAxis.tickSizeOuter(0);
+        console.log("Y-AXIS");
+        console.log(yAxis);
         
         this.gY = d3.select(this.svg).append('g')
                 .attr('class', 'y axis')
-                .attr('transform', `translate(${this.marginLeft}, 0)`)                
+                .attr('transform', () => {
+                    if(axisOrientation == 'cross')
+                        return `translate(${this.marginLeft + this.innerWidth/2}, 0)`;
+                    return `translate(${this.marginLeft}, 0)`
+                })                
                 .call(yAxis);
+        if(axisOrientation == 'cross')
+            this.gY.selectAll(".tick line")
+                   .attr("transform", "translate(3,0)");
 
+               
         this.gY.append('text')
                 .attr('class', 'label')
                 .attr('transform', 'translate(' + (0 - this.marginLeft / 1.25) + ',' + (this.height / 2) + ') rotate(-90)')
