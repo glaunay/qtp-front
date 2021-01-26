@@ -1,4 +1,4 @@
-# typescript-app-2
+# qtyp-front
 
 ## Project setup
 ```
