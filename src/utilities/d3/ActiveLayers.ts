@@ -87,7 +87,7 @@ export default class ActiveLayers {
                 }
             }
             else if(sliderUI.currentAxType == 'bottom') {
-                console.log(`current active count ${sliderUI.currentAxNum}`);
+                console.log(`Bottom slider, current active count ${sliderUI.currentAxNum}`);
                 if(sliderUI.currentAxNum == 1 &&
                     x2 == frame.x2) {
                     console.log('Right Layer(s) to mod');
@@ -102,7 +102,8 @@ export default class ActiveLayers {
                     d3.select(this).attr('x2', xLimSl[1])
                     .attr('width', xLimSl[1] - frame.x1);                    
                 }
-                else { 
+                else if( x  != frame.x1 && 
+                         x2 != frame.x2 ) { 
                     console.log('Middle Layer(s) to mod');
                     console.log(xLimSl);
                     d3.select(this).attr('x', xLimSl[1])
