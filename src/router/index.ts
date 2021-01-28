@@ -1,6 +1,13 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import Data from '../views/DataSpreadSheet.vue'
 import Home from '../views/Home.vue'
+import DataExplore from '../views/DataExplore.vue'
+
+import { createApp } from 'vue'
+const app1 = createApp(DataExplore);
+const app2 = createApp(DataExplore);
+
+
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/data-spreadsheet',
@@ -13,12 +20,12 @@ const routes: Array<RouteRecordRaw> = [
     component: Home
   },
   {
-    path: '/volcano',
-    name: 'Volcanoes',
+    path: '/data-explore',
+    name: 'DataExplore',
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/Volcanoes.vue')
+    component: () => import(/* webpackChunkName: "about" */ '../views/DataExplore.vue')
   }
 ]
 

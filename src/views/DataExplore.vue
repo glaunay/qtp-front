@@ -1,6 +1,6 @@
 <template>
 
-    <h1>This is Volcanoes!!</h1>
+    <h1>This is a Plot!!</h1>
     Choose data records 
     <button v-if="canDraw"
     class="p-1 rounded bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-opacity-50"
@@ -15,19 +15,6 @@
       :class="{ active: isSelected(column) }"
       ></div>
     </div>
-  <!--
-    <label class="block">
-      <span class="text-gray-700">Select</span>
-      <select class="form-select block w-full mt-1">
-        <option v-for="column in availableData" :key="column" v-text="column"></option>
-      </select> 
-      </label>
-    </div>
-    <Sliders/>
-    -->
-    
-   <!--  <Volcano :x="[5,3]" :y="[9,1]"/> -->
-    <!-- <button @click="test()" class="p-1 border rounded shadow w-15 h-10">TEST</button>-->
     <div class="p-2">
      <Volcano :data="plotData"/>
     <!-- <Volcano height=500 width=500/> -->

@@ -19,8 +19,8 @@ export default defineComponent({
     return {
       itemList : [
                 { title: "Data"      , to: "/data-spreadsheet" },
-                { title: "volcanoes", to: "/volcano" },
-      ]
+                { title: "Explore", to: "/data-explore" }
+                ]
     };
   },
   props: {

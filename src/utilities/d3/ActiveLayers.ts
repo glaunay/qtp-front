@@ -2,14 +2,14 @@
 import * as d3 from "d3";
 import { Sliders, axType, axNum } from './Sliders';
 import VolcanoPlot from './VolcanoPlot';
-import { PlotFrame } from './Axis';
+import { ActiveCorners } from './Axis';
 import { axisRight } from "d3";
 import { defineAsyncComponent, registerRuntimeCompiler } from "vue";
 
 type RectSel = d3.Selection<SVGRectElement, number, SVGGElement, unknown>
 export default class ActiveLayers {
     svg: SVGSVGElement;
-    plotFrame?: PlotFrame;
+    activeArea?: ActiveCorners;
     recPool: RectSel;
     constructor(svg: SVGSVGElement) {
         this.svg = svg;
@@ -48,14 +48,15 @@ export default class ActiveLayers {
         return sel;
     }
     resize(sliderUI: Sliders){
-        if(!this.plotFrame)
-            throw('Missing a plot frame to resize active layer');
-        const frame = {
+        if(! this.activeArea)
+            throw('Missing a plot corners to resize active layer');
+            const frame: ActiveCorners = this.activeArea;
+         /*
             x1 : this.plotFrame.marginLeft,
             x2 : Number.parseInt( d3.select(this.svg).attr('width') ) - this.plotFrame.marginRight,
             y1 : this.plotFrame.marginTop,
             y2 : Number.parseInt( d3.select(this.svg).attr('height') ) - this.plotFrame.marginBot
-        };
+        };*/
 
         console.log("RESIZING LOGIC");
         const xLimSl = sliderUI.xLimits;
@@ -114,9 +115,9 @@ export default class ActiveLayers {
         });
     }
     toggle(sliderUI: Sliders, x: number, y: number) {
-        if(!this.plotFrame)
-            throw('Missing a plot frame to toggle active layer');
-        const axis = this.plotFrame;
+        if(! this.activeArea)
+        throw('Missing a plot corners to resize active layer');
+        const frame: ActiveCorners = this.activeArea;
         console.log("adding layers");    
         const xLimSl = sliderUI.xLimits;
         const yLimSl = sliderUI.yLimits;
@@ -125,20 +126,17 @@ export default class ActiveLayers {
         console.log(x,y);
     
         // Upper-left, bottom-right corners of data projection area
-        /*let x1 = 0,
-            x2 = Number.parseInt( d3.select(this.svg).attr('width') ),
-            y1 = 0,
-            y2 = Number.parseInt( d3.select(this.svg).attr('height') );
-        */
+        /*
         let x1 = axis.marginLeft,
             x2 = Number.parseInt( d3.select(this.svg).attr('width') ) - axis.marginRight,
             y1 = axis.marginTop,
             y2 = Number.parseInt( d3.select(this.svg).attr('height') ) - axis.marginBot;
-
+        */
 
         // browse xlim and find smaller than negative -> x0
         //                              positive ->
         
+        let {x1, y1, x2, y2} = frame;
         console.log(`Starting ${x1},${y1}:${x2},${y2}`) 
         console.log(`Ping at ${x} ${y}`);
         console.log(typeof(x));
@@ -166,7 +164,6 @@ export default class ActiveLayers {
             x1 = xLeft;
             x2 = xRight;
         }
-        console.log(axis.axisSpecs);
 
         console.log(`Painting ${x1},${y1}:${x2},${y2}`);
         const xRec = x1;

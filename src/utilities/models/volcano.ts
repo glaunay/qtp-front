@@ -5,9 +5,16 @@ type plotData = {
     yLabel: string;
 };
 
+/* Container to build scatter plot with associated datum */
 interface Points {
     x: number;
     y: number;
 };
+interface DatumPoints extends Points {
+    datum: Record<string, string|number>
+}
 
-export{ Points, plotData };
+type transform = "log10" | "-log10" | "none";
+
+
+export{ Points, plotData, transform };

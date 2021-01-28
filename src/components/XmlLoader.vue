@@ -88,7 +88,7 @@ export default defineComponent({
         onMounted(()=>{
             setTimeout(async() => {
                 console.log("trying to fecth")
-                const arrayData = await fetch("../data_s1_FC_pv.xlsx")
+                const arrayData = await fetch("../TMT-donées brutes_dev.xlsx")
                     .then( (response) =>{
                         console.log(response.status);
                         console.log("success");

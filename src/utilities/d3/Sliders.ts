@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import { PlotFrame } from "./Axis";
+import { ActiveCorners } from "./Axis";
 import { trCoordinates } from './utils';
 
 export type axType = 'bottom'| 'right';
@@ -17,7 +17,9 @@ export class Sliders {
     specsRight: SlidersI = { handlers : [], ghosts : [] };
     currentAxType?: axType;
     currentAxNum?: axNum;
-    plotFrame: PlotFrame;
+    //plotFrame: PlotFrame;
+    bottomOffset: number;
+    activeArea: ActiveCorners;  
     public get xLimits(): number[] {
         return this.specsBot.handlers.map((g)=>{
             const _ = g.attr('transform');
@@ -34,9 +36,10 @@ export class Sliders {
             return t[1];
         });
     }
-    constructor(plotFrame: PlotFrame){
-        this.svg = plotFrame.svg;
-        this.plotFrame = plotFrame;
+    constructor(svg: SVGSVGElement, activeCorners: ActiveCorners, bottomOffset=0){
+        this.svg = svg;
+        this.activeArea = activeCorners;
+        this.bottomOffset = bottomOffset;
     }
     private slideFn?: (arg0: Sliders, arg1?: axType, arg2?: axNum) => void;
     private drawHandler(axis: axType, count: axNum) {
@@ -45,13 +48,13 @@ export class Sliders {
         const h = Number.parseInt(d3.select(this.svg).style("height")),
               w = Number.parseInt(d3.select(this.svg).style("width"));
         
-        
+        const yPos = h - this.bottomOffset;
         let slCoor: number, slCoorLow: number|undefined;
         
-        slCoor    = (count == 2 ? 3/4 : 1/2) * (axis == 'bottom' ? w : h);
-        slCoorLow = count == 2 ? 1/4 * (axis == 'bottom' ? w : h) : undefined;        
+        slCoor    = (count == 2 ? 3/4 : 1/2) * (axis == 'bottom' ? w : yPos);
+        slCoorLow = count == 2 ? 1/4 * (axis == 'bottom' ? w : yPos) : undefined;        
 
-   
+        const frame = this.activeArea;
         //const sliders: SlidersI = { handlers : [], ghosts : [] };
         const sliders = axis == 'bottom' ? this.specsBot : this.specsRight;
         const generateHandlerG = (size: number, initCoor: number) => {
@@ -61,21 +64,21 @@ export class Sliders {
             .attr('id', 'symbol')
             .attr('d', symbol)
             g.append('line')
-            .attr('x1', axis == "bottom" ? 0 : 0  )
-            .attr('x2',0)
-            .attr('y1', -1 * h)//-1 * xOffset) 
-            .attr('y2', 0)
+            .attr('x1', 0)
+            .attr('x2', 0)
+            .attr('y1', 0)//-1 * xOffset)  // Bottom or right start point coor
+            .attr('y2', (-1) * (frame.y2 - frame.y1) - this.bottomOffset )
             .attr("stroke", "gray")
             .attr('stroke-dasharray', "10,10")
             .attr('stroke-width', 2);
             g.attr('transform', axis == 'bottom'
-                                ? `translate(${initCoor}, ${h})`
+                                ? `translate(${initCoor}, ${yPos})`
                                 : `rotate(270, ${w},${initCoor}) translate(${w}, ${initCoor})`
                                 );                    
             return g;
         }
 
-        const frame = this.plotFrame.getActiveCorners();
+        
 
         for (let i: axNum = 1 ; i <= count ; i++) {
             const gSlider = generateHandlerG(size, i == 1 ? slCoor : slCoorLow as number);
@@ -127,7 +130,7 @@ export class Sliders {
                     }
                     gSlider.attr('transform', 
                                             axis == 'bottom' 
-                                            ? `translate(${newCoor},${h})`
+                                            ? `translate(${newCoor},${yPos})`
                                             : `rotate(270, ${w},${newCoor}) translate(${w},${newCoor})`
                                             );
                     if(this.slideFn)
