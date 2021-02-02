@@ -73,7 +73,7 @@ export default createStore({
       }
       return _;
     },
-    getColDataByName(state, getters): (colName: string, type: string) => number|any[]|null { // We should index column by first element eg : { "colName":[ COL_DATA ]}
+    getColDataByName(state, getters): (colName: string, type: string) => number|any[]|undefined { // We should index column by first element eg : { "colName":[ COL_DATA ]}
       const [nRow, nCol] = getters.dimensions;
       return (colName: string, type="number") => {
         for (let j = 0; j < nCol ; j++) {
@@ -88,7 +88,7 @@ export default createStore({
             return w;
           }
         }
-        return null;
+        return undefined;
       };
   }
   },

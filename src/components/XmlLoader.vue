@@ -52,6 +52,8 @@ import DragAndDrop from '@/components/DragAndDrop.vue';
 import XLSX  from 'xlsx';
 import { useStore } from 'vuex'
 
+import { UniprotDatabase } from '../utilities/uniprot-database';
+
 export default defineComponent({
     components : { DragAndDrop },
     setup(){
@@ -79,7 +81,7 @@ export default defineComponent({
             return  store.getters.dimensions;
         });
         const cell = (x: number, y: number)=>{
-            const _ = store.getters.cell(x, y)
+            //const _ = store.getters.cell(x, y)
             return store.getters.cell(x, y);
         };
         const increment = () => {
@@ -88,7 +90,9 @@ export default defineComponent({
         onMounted(()=>{
             setTimeout(async() => {
                 console.log("trying to fecth")
-                const arrayData = await fetch("../TMT-donées brutes_dev.xlsx")
+                const arrayData = await fetch(
+                    'xls/TMT-donées brutes_Results_20-0609-0618_VegetativeExp_V2_proteins.xlsx'
+                    )//'../TMT-donées brutes_Results_20-0609-0618_VegetativeExp_V2_proteins.xlsx')//fetch("../TMT-donées brutes_dev.xlsx")
                     .then( (response) =>{
                         console.log(response.status);
                         console.log("success");
@@ -100,7 +104,18 @@ export default defineComponent({
                     const wb = XLSX.read(data, {type:"array"});
                     store.dispatch('initStoreBook', wb);
                     loaded.value = true;
-
+                    
+                    const status = await UniprotDatabase.init();
+                    if(!status)
+                        throw("Backend seems unreachable");
+                    /*const d = await UniprotDatabase.load(["P11446", "P02924", "AVDF"]);
+                    console.dir(d);*/
+                    const uniprotIdList: string[]|undefined = store.getters.getColDataByName("Accession", "string");
+                    if (uniprotIdList) {
+                        console.log(`Trying to load ${uniprotIdList.length} elements`);
+                        const d = await UniprotDatabase.load(uniprotIdList);
+                    //    console.dir(d);
+                    }
                     //console.log(store.getters.json);
                 }
             }
