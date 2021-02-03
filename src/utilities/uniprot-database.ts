@@ -62,40 +62,7 @@ export namespace UniprotDatabase {
     
         return uniprotData;        
     }
-
-    export const create = async (url?: string): Promise<void> =>  {
-            /*
-            if (! await handshake(url))
-                throw("Could not handshake uniprot provider") 
-            */
-            
-            return new Promise( (res, rej) => {
-                //let cnt = 0;
-              
-                DBOpenRequest = indexedDB.open(dbName, V_NUM);
-                
-                
-                DBOpenRequest.onerror = function(event) {
-                    console.log("Connnection error");
-                    rej( (event.target as IDBOpenDBRequest).error );
-                };
-                
-                DBOpenRequest.onsuccess = function(event) {
-                    //DB = DBOpenRequest.result;
-                    DB = (event?.target as IDBOpenDBRequest).result;
-                    console.log("Connection success");
-                };
-
-                DBOpenRequest.onupgradeneeded = function(event: IDBVersionChangeEvent) {
-                    console.log("UPGRADE NEEDED");                    
-                    DB = (event?.target as IDBOpenDBRequest).result                
-                    const objectStore = DB.createObjectStore("uniprotEntity", {keyPath: "id"});                                       
-                }
-                // Should not be here
-                res();
-            });
-            
-    }
+    
     export const add = async (uniprotIDs: string[]) => {
         console.log("ADD CALL");
         const uniprotData: UniprotFetch = await fetchFrom(uniprotIDs);

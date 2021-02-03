@@ -106,8 +106,6 @@ export default defineComponent({
                     store.dispatch('initStoreBook', wb);
                     loaded.value = true;
                     
-                    /*const d = await UniprotDatabase.load(["P11446", "P02924", "AVDF"]);
-                    console.dir(d);*/
                     const uniprotIdList: string[]|undefined = store.getters.getColDataByName("Accession", "string");
                     if (uniprotIdList) {
                         console.log(`Trying to load ${uniprotIdList.length} elements`);
