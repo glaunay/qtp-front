@@ -100,21 +100,28 @@ export default defineComponent({
                     })
                     .catch(()=>console.error("No XLS found"));
                 if(arrayData) {
+                    console.log("OUOUH");
                     const data = new Uint8Array(arrayData);
                     const wb = XLSX.read(data, {type:"array"});
                     store.dispatch('initStoreBook', wb);
                     loaded.value = true;
                     
-                    const status = await UniprotDatabase.init();
-                    if(!status)
-                        throw("Backend seems unreachable");
                     /*const d = await UniprotDatabase.load(["P11446", "P02924", "AVDF"]);
                     console.dir(d);*/
                     const uniprotIdList: string[]|undefined = store.getters.getColDataByName("Accession", "string");
                     if (uniprotIdList) {
                         console.log(`Trying to load ${uniprotIdList.length} elements`);
-                        const d = await UniprotDatabase.load(uniprotIdList);
-                    //    console.dir(d);
+                        try{
+                            const n = await UniprotDatabase.add(uniprotIdList);
+                            console.log(`${n} additions OK`);
+
+                        }catch(e){
+                            console.log("ERROR")
+                            throw(e);
+                        }                       
+                        await UniprotDatabase.readAll();
+                        const d = await UniprotDatabase.get("P00961");
+                        console.dir(d);
                     }
                     //console.log(store.getters.json);
                 }

@@ -83,8 +83,8 @@ export default createStore({
                      Number.parseFloat(getters.cell(i+1, j)) :
                      getters.cell(i+1, j);
             });
-            console.log(`Vector ${colName}`);
-            console.log(w);
+           // console.log(`Vector ${colName}`);
+           // console.log(w);
             return w;
           }
         }
