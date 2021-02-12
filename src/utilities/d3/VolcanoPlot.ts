@@ -50,6 +50,8 @@ export default class VolcanoPlot {
                 .attr('cy', (d) => this.yScale(d.y))
                 /*.attr('class', circleClass)*/
                 .on('mouseenter', (e,d) => console.log(d))
-                .on('click', (e, d) => { e.stopPropagation();  });
+                .on('click', (e, d) => { e.stopPropagation();  })
+                .each((d)=>console.group(d))
+                ;
     }
 }

@@ -29,6 +29,8 @@ import VolcanoPlot from '../utilities/d3/VolcanoPlot';
 import { Sliders } from '../utilities/d3/Sliders';
 import ActiveLayers from '../utilities/d3/ActiveLayers';
 import * as t from '../utilities/models/volcano';
+import { useStore } from 'vuex';
+import { UniprotDatabase } from '../utilities/uniprot-database';
 /*
 This will have to be made reactive in parent .vue
 */
@@ -60,6 +62,10 @@ export default defineComponent({
         },
     },
     setup(props){
+        const store = useStore()
+        const uniprotID = store.getters.getColDataByName("Accession");
+
+
         const svgRoot: Ref<SVGSVGElement|null> = ref(null);
         // Getting props (reactive) references
         const { data, transformy } = toRefs(props)
@@ -73,7 +79,8 @@ export default defineComponent({
                 x:e, 
                 y: yTransform == '-log10' ? (-1)*Math.log10(data.y[i])
                                           : yTransform == 'log10'  ? Math.log10(data.y[i])
-                                          : data.y[i] // aka 'none'
+                                          : data.y[i], // aka 'none'
+                d: UniprotDatabase.get( uniprotID[i] )
                 }) );
             console.log("Creating ActiveLayers");
             const layerUI = new ActiveLayers(svgRoot.value as SVGSVGElement);

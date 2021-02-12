@@ -45,7 +45,7 @@ export namespace UniprotDatabase {
         }
     }
 
-    export const fetchFrom = async (uniprotIDs: string[]): Promise<UniprotFetch> => {
+    const fetchFrom = async (uniprotIDs: string[]): Promise<UniprotFetch> => {
         console.log(`ff Loading ${uniprotIDs.length} items ff`);
         const response = await fetch(`${providerURL ? providerURL : ''}/api/uniprot/many`, {
             method: 'POST',
